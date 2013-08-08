@@ -15,7 +15,7 @@
 #              Added a safeguard and print usage when no argument given
 #              Added a safeguard when information of the local node aren't found
 ################################################################################
-# Currently there is a bug in clustat preventing non-root users to use clustat
+# In RHEL 5, there is a bug in clustat preventing non-root users to use clustat
 # https://bugzilla.redhat.com/show_bug.cgi?id=531273
 # You might need to use setuid on clustat to change this if rgmanager cannot be
 # upgraded to 3.0.7+
@@ -132,7 +132,7 @@ def main():
         clustatOutput = os.popen('/usr/sbin/clustat -fx')
         dom = xml.dom.minidom.parse(clustatOutput)
     except Exception, e:
-        print "UNKOWN: could not parse output of : '/usr/sbin/clustat -fx': ", e
+        print "UNKNOWN: could not parse output of : '/usr/sbin/clustat -fx': ", e
         sys.exit(3)
     if typeCheck == 'cluster':
 
