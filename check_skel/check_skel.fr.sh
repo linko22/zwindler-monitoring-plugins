@@ -7,6 +7,7 @@ WARNING=1
 CRITICAL=2
 UNKNOWN=3
 
+#En cas de sortie non prevue du script
 FINAL_STATE=$UNKNOWN
 FINAL_COMMENT="UNKNOWN : Une erreur dans le script ou un echec de la commande empeche la verification, merci de verifier que tout fonctionne bien comme il le devrait"
 
@@ -15,22 +16,30 @@ WARNING_LIMIT=1
 CRITICAL_LIMIT=2
 ENABLE_PERFDATA=0
 
+#Si on a des arguments et qu'on veut les verifier
+if [[ -z $1 ]] ; then
+        #Faire une fonction USAGE
+        echo "Usage : $0 [-v] MY_ARGUMENT WARNING_LIMIT CRITICAL_LIMIT"
+        exit 1
+fi
+
 #Recuperation des arguments
 if [[ $1 == "-v" ]]; then
         echo "Activation du verbose mode"
-	echo 
+        echo
         VERBOSE=1
         shift
 fi
-
-#Si on a des arguments et qu'on veut les verifier
-if [[ -z $1 ]] ; then
-	#Faire une fonction USAGE
+if [[ $# -ge 1 ]]; then
+        MY_ARGUMENT=$1
+        shift
+        #MY_ARGUMENT_2=$1
+        #shift
+else
+        #Faire une fonction USAGE
+        echo "Pas assez d'arguments !"
         echo "Usage : $0 [-v] MY_ARGUMENT WARNING_LIMIT CRITICAL_LIMIT"
         exit 1
-else
-	MY_ARGUMENT=$1
-	shift
 fi
 if [[ -n $1 ]] ; then
         WARNING_LIMIT=$1
