@@ -1,8 +1,16 @@
 #!/usr/bin/perl
 
+################################################################################
 # Simplification of check_all_disks.pl (YM?) to check only one disk
 # check_single_disk.pl [FS_to_check] [warn] [crit]
-# Denis GERMAIN
+################################################################################
+# 24/09/2013 : first version
+################################################################################
+# 25/09/2013 : adding perfdata, OK for Linux and HP-UX
+#              changing nagios return code
+#              code cleanup (check was initially designed for multiple disks)
+################################################################################
+
 
 my $os = os_uname();
 $os = "IRIX" if $os =~ "IRIX64"; # IRIX can have two different unames.
@@ -54,10 +62,10 @@ my %commandlist = (
 
 BEGIN { $ENV{PATH} = '/bin:/usr/bin:/usr/local/bin:/usr/sbin' }
 
-my %ERRORS = ('UNKNOWN', '-1',
-                'OK', '0',
+my %ERRORS = ('OK', '0',
                 'WARNING', '1',
-                'CRITICAL', '2');
+                'CRITICAL', '2',
+                'UNKNOWN', '3');
 
 my $selected_disk = shift || &usage(%ERRORS);
 my $warn = shift || 85;
@@ -76,7 +84,7 @@ chomp($servanswer);
 #
 
 my $state = disk_warnings();
-exit $ERRORS{$state};
+exit $ERRORS{"$state"};
 
 
 ### Subroutines ##############################################
@@ -87,22 +95,22 @@ sub disk_warnings
   my $print_answer;
 
   #check disk
-  split(/\,/,$servanswer);
-  $print_answer="$_[0]=$_[1]\%";
+  $print_answer="$selected_disk=$servanswer\%";
+  $perfdata="$selected_disk=$servanswer\%;$warn;$critical;0;100";
 
-  if ($_[1] >= $critical)
+  if ($servanswer >= $critical)
     {
-    print "Critical: $print_answer\n";
+    print "CRITICAL: $print_answer| $perfdata\n";
     $state = "CRITICAL";
     }
-  elsif ($_[1] >= $warn)
+  elsif ($servanswer >= $warn)
     {
-    print "Warning: $print_answer\n";
+    print "WARNING: $print_answer| $perfdata\n";
     $state = "WARNING";
     }
   else
     {
-    print "Ok: $print_answer, below warning/critical thresholds\n";
+    print "OK: $print_answer, below warning/critical thresholds| $perfdata\n";
     }
   return($state);
   }
@@ -129,7 +137,7 @@ sub os_uname
 
 sub getdisk
         {
-        my $disklisting;
+        my $dfoutput;
 
         open(DFOUTPUT,"$commandlist{$os}{dfcommand}$selected_disk $ignore_error_output |") || die;
         $_ = <DFOUTPUT>;
@@ -137,12 +145,12 @@ sub getdisk
                 {
                 if (/^[\w\/\:\.\-\=]*\s*\d*\s*\d*\s*\d*\s*(\d*)\%\s*([\w\/\-]*)/)
                         {
-                        $disklisting .= "(".$2.",".$1.")";
+                        $dfoutput .= $1;
                         }
                 }
-        if ($disklisting)
+        if ($dfoutput)
                 {
-                return $disklisting;
+                return $dfoutput;
                 }
         else
                 {
@@ -150,5 +158,5 @@ sub getdisk
                 exit $ERRORS{"CRITICAL"};
                 }
         close(DFOUTPUT);
-        undef $disklisting;
+        undef $dfoutput;
         }
