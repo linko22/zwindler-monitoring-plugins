@@ -1,6 +1,6 @@
 #!/bin/bash
 ############################################################################
-#This file is a part of zwindler.nagios-plugins repository
+#This file is a part of zwindler-monitoring-plugins repository
 #Copyright (C) 2013 zwindler
 #
 #This program is free software: you can redistribute it and/or modify
