@@ -6,6 +6,22 @@
 # This version is a modified version of the initial script found at
 # https://github.com/opinkerfi/nagios-plugins/blob/master/check_rhcs/check_rhcs
 # No licence found in this version
+############################################################################
+#This file is a part of zwindler-monitoring-plugins repository
+#Copyright (C) 2013 zwindler
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program. If not, see {http://www.gnu.org/licenses/}.
 ################################################################################
 # Denis GERMAIN <dt.germain @ gmail.com>
 # 08/08/2013 - Changed the way local node is found. Use the "local" parameter 
