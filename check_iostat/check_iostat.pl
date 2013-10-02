@@ -19,6 +19,8 @@
 #01/10/2013 - First version, still lot to do (warn + crit) + debug option
 #             VG regroupment for Linux not done yet (might crash)
 ############################################################################
+#02/10/2013 - Linux version added, checked
+############################################################################
 
 my $os = os_uname();
 
