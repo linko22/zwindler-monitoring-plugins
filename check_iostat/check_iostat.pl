@@ -21,6 +21,12 @@
 ############################################################################
 #02/10/2013 - Linux version added, checked
 ############################################################################
+#04/10/2013 - VG regroupment is not working when nrpe works as Nagios as LVM
+#             commandes requires privileges. As a temporary workaround the 
+#             following can be used but from a security PoV this is awful!!
+#             # chown root:nagios /usr/sbin/pvs
+#             # chmod u+s /usr/sbin/pvs
+############################################################################
 
 my $os = os_uname();
 
@@ -235,7 +241,7 @@ sub getdata
 	elsif ($os eq "Linux")
 		{
 		#Getting VG/PV information
-		@pvtable = getpvpervg_linux("pvs");
+		@pvtable = getpvpervg_linux("/usr/sbin/pvs");
 
 		#Getting iostat
 		@iostatoutput = getiostat_linux("/usr/bin/iostat -d -k 1 2");
