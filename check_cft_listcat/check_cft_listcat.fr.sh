@@ -32,17 +32,18 @@ PATH=$PATH:$HOME/bin:$CFTPATH/bin:$CFTPATH/scripts:$CFTPATH/runtime/bin:/usr/ker
 export PATH
 . $CFTPATH/home/profile
 
-NBWARN=$1
-if [[ -z $NBWARN ]] ; then NBWARN=8000 ; fi
-NBCRIT=$2
-if [[ -z $NBCRIT ]] ; then NBCRIT=9000 ; fi
-
-#Fichier de log pour extract/debug
 LOG=/tmp/check_cft_listcat.csv
 
+NBMAX=`cftutil listcat | grep "Catalog file" | awk '{print $1}'`
+NBWARN=$1
+if [[ -z $NBWARN ]] ; then NBWARN=`echo "$NBMAX*80/100" | bc` ; fi
+NBCRIT=$2
+if [[ -z $NBCRIT ]] ; then NBCRIT=`echo "$NBMAX*90/100" | bc` ; fi
+
 NBUSED=`cftutil listcat | grep 'selected' | awk '{print $1}'`
-PERFDATA=" | nbre=$NBUSED;$NBWARN;$NBCRIT;; "
 RETCDE=$?
+
+PERFDATA=" | nbre=$NBUSED;$NBWARN;$NBCRIT;; "
 
 echo $TIMESTAMP\;$NBUSED >> $LOG
 
@@ -54,13 +55,13 @@ fi
 
 if [ $NBUSED -gt $NBCRIT ]
         then
-                echo "CRITICAL: Attention ${NBUSED} transferts presents dans le catalogue CFT, les process CFT s arretent si le catalogue est plein !!!!!! $PERFDATA"
+                echo "CRITICAL: Attention ${NBUSED} transferts presents dans le catalogue CFT, a $NBMAX les process CFT s arretent  !!!!!! $PERFDATA"
                 exit 2
 fi
 
 if [ $NBUSED -gt $NBWARN ]
         then
-                echo "WARNING: Attention ${NBUSED} transferts presents dans le catalogue CFT, les process CFT s arretent si le catalogue est plein !!!!!! $PERFDATA"
+                echo "WARNING: Attention ${NBUSED} transferts presents dans le catalogue CFT, a $NBMAX les process CFT s arretent  !!!!!! $PERFDATA"
                 exit 1
         else
                 echo "OK: $NBUSED transferts presents dans le catalogue CFT. $PERFDATA"
