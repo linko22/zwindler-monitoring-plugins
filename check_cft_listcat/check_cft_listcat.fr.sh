@@ -1,3 +1,4 @@
+#!/bin/sh
 ############################################################################
 #This file is a part of zwindler-monitoring-plugins repository
 #Copyright (C) 2013 zwindler
