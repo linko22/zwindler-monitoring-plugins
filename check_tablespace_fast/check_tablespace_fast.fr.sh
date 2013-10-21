@@ -99,8 +99,18 @@ SPOOL off
 exit
 EOT
 
-TEST_CRITICAL_OUTPUT=`/usr/bin/tail -n +4 ${FILE_CRITICAL}.lst | sed 's/\([0-9][0-9]*,[0-9]\)[0-9]*/\1%/g'`
-TEST_WARNING_OUTPUT=`/usr/bin/tail -n +4 ${FILE_WARNING}.lst | sed 's/\([0-9][0-9]*,[0-9]\)[0-9]*/\1%/g'`
+TEST_CRITICAL_OUTPUT=`/usr/bin/tail -n +4 ${FILE_CRITICAL}.lst | /usr/bin/sed 's/\([0-9][0-9]*,[0-9]\)[0-9]*/\1%/g'`
+if [[ $? -ne 0 ]] ; then
+        echo $FINAL_COMMENT
+        exit $FINAL_STATE
+fi
+
+TEST_WARNING_OUTPUT=`/usr/bin/tail -n +4 ${FILE_WARNING}.lst | /usr/bin/sed 's/\([0-9][0-9]*,[0-9]\)[0-9]*/\1%/g'`
+if [[ $? -ne 0 ]] ; then
+        echo $FINAL_COMMENT
+        exit $FINAL_STATE
+fi
+
 if [[ -n $TEST_CRITICAL_OUTPUT ]]; then
         FINAL_COMMENT="CRITICAL, tablespace(s) en erreur : $TEST_CRITICAL_OUTPUT"
         FINAL_STATE=$CRITICAL
