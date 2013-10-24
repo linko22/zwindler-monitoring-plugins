@@ -26,6 +26,7 @@ import shutil
 import string
 import time
 import datetime
+import random
 import sys
 import getopt
 
@@ -141,6 +142,9 @@ def main():
         filename="check_dp_spec.py."+datalist+".output"
         report_command='/opt/omni/bin/omnidb -session'+last+' -datalist "'+datalist+'" &> '+local_path+filename+' 2> '+local_path+filename+'err'
 
+        #Avant de lancer la commande, on attend de maniere aleatoire pour reduire les connexions concurrentes multiples
+        random.seed()
+        time.sleep(3*random.random())
         #Recuperation du fichier rapport
         #print report_command
         os_return=os.system(report_command)
