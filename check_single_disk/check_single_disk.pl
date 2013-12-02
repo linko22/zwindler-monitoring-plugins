@@ -25,7 +25,9 @@
 #              changing nagios return code
 #              code cleanup (check was initially designed for multiple disks)
 ################################################################################
-
+# 02/12/2013 : corrected loophole in check : if disk was not mounted, check
+#              displayed the disk underneath without throwing an error
+################################################################################
 
 my $os = os_uname();
 $os = "IRIX" if $os =~ "IRIX64"; # IRIX can have two different unames.
@@ -160,16 +162,17 @@ sub getdisk
                 {
                 if (/^[\w\/\:\.\-\=]*\s*\d*\s*\d*\s*\d*\s*(\d*)\%\s*([\w\/\-]*)/)
                         {
-                        $dfoutput .= $1;
+                        $dfoutput = $1;
+                        $dfdisk = $2;
                         }
                 }
-        if ($dfoutput)
+        if (($dfdisk eq $selected_disk) && ($dfoutput))
                 {
                 return $dfoutput;
                 }
         else
                 {
-                print "CRITICAL : Disk not found\n";
+                print "CRITICAL : Disk not found or not mounted\n";
                 exit $ERRORS{"CRITICAL"};
                 }
         close(DFOUTPUT);
