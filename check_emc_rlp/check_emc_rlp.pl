@@ -32,14 +32,15 @@ my %ERRORS = ('OK', '0',
                 'UNKNOWN', '3');
 
 #Initialisation (add variables for Naviseccli)
-BEGIN { $ENV{PATH} = '/bin:/usr/bin:/usr/local/bin:/usr/sbin:/opt/Navisphere/bin' }
-BEGIN { $ENV{SHLIB_PATH} = '$SHLIB_PATH:/opt/Navisphere/lib/seccli' }
-BEGIN { $ENV{NAVI_SECCLI_CONF} = '$NAVI_SECCLI_CONF:/opt/Navisphere/seccli' }
+$ENV{PATH} = '/bin:/usr/bin:/usr/local/bin:/usr/sbin:/opt/Navisphere/bin';
+$ENV{SHLIB_PATH} = '/opt/Navisphere/lib/seccli';
+$ENV{NAVI_SECCLI_CONF} = '/opt/Navisphere/seccli'; 
 
-my $naviseccli_cmd = "naviseccli -h IP_ADDRESS reserved -lunpool -list";
+#Nagios env variable bypass
+my $secfilepath="/home/nagios";
+my $naviseccli_cmd = "naviseccli -h 172.16.1.240 -secfilepath $secfilepath reserved -lunpool -list";
 #We use -list with no subcommand because naviseccli gives more information
 #that way...
-my $ignore_error_output = "2>/dev/null";
 
 #Getting arguments
 my $IP_ADDRESS = shift || "127.0.0.1";
@@ -61,7 +62,7 @@ process_data(@collected_data);
 print "UNKNOWN: There is a problem with the plugin. Exiting.\n";
 exit $ERRORS{"UNKNOWN"};
 
-### Subroutines ############################################################
+### Subroutines ##############################################
 
 #Collect data
 sub collect_data
@@ -73,9 +74,8 @@ sub collect_data
 	my $current_lun;
 	my $current_lun_percent;
 
-	open(IOSTATOUT,"$naviseccli_cmd $ignore_error_output |") || die;
-	$_ = <IOSTATOUT>;
-	while($_ = <IOSTATOUT>)
+	open(NAVICLIOUT,"$naviseccli_cmd |") || die "Failed: $!\n";
+	while( <NAVICLIOUT> )
 		{
 		if (/^Number of Unallocated LUNs in Pool:\s+(\d+)/)
 			{
@@ -93,7 +93,7 @@ sub collect_data
 			}
 		}
 	@collected_data = ($lun_count, $unalloc_rlp, @collected_data);
-	close(IOSTATOUT);
+	close(NAVICLIOUT);
 	return @collected_data;
     }
 
@@ -141,7 +141,7 @@ sub process_data
 			$state = "CRITICAL";
 			$print_answer = "CRITICAL: there are no free RLP and one or more lun are over $critical%!!!";
 			}
-		$perfdata .= "lun".$lun_num."=".$lun_percent."%;$critical;$critical;0; ";
+		$perfdata .= "lun".$lun_num."=".$lun_percent."%;$critical;$critical;0;100 ";
 		}
 	$perfdata .= "free_rlp_per_lun=$rlp_per_lun;$warning;;0; ";
 
@@ -155,4 +155,3 @@ sub process_data
 	print $print_answer;
 	exit $ERRORS{$state};
 	}
-
