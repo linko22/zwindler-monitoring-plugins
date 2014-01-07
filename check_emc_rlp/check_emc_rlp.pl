@@ -86,7 +86,7 @@ sub collect_data
 			$current_lun=$1;
 			$lun_count += 1;
 			}
-		elsif (/^Lun Pool LUN % Used:\s+(\d+)/)
+		elsif (/^Lun Pool LUN % Used:\s+(\d+.\d)/)
 			{
 			$current_lun_percent=$1;
 			@collected_data = (@collected_data,"$current_lun;$current_lun_percent");
