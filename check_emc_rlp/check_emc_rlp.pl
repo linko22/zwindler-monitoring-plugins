@@ -38,7 +38,7 @@ $ENV{NAVI_SECCLI_CONF} = '/opt/Navisphere/seccli';
 
 #Nagios env variable bypass
 my $secfilepath="/home/nagios";
-my $naviseccli_cmd = "naviseccli -h 172.16.1.240 -secfilepath $secfilepath reserved -lunpool -list";
+my $naviseccli_cmd = "naviseccli -h IP_ADDRESS -secfilepath $secfilepath reserved -lunpool -list";
 #We use -list with no subcommand because naviseccli gives more information
 #that way...
 
