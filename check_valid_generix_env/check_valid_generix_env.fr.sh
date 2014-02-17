@@ -141,7 +141,6 @@ else
                         if [[ $? -ne 0 ]]; then ERRORS=`expr $ERRORS + 1`; FINAL_COMMENT="$FINAL_COMMENT binaire $i mal transfere; " ; fi
                 done
 
-
                 #Verification des maquettes
                 find -P $ENV_PATH/langue -mount -type f $DATE_MOD > $TEMP_FILE
                 for i in `grep -e "\.maq$" $TEMP_FILE`; do
@@ -149,6 +148,11 @@ else
                         if [[ $? -ne 0 ]]; then ERRORS=`expr $ERRORS + 1`; FINAL_COMMENT="$FINAL_COMMENT maquette $i au format DOS; " ; fi
                 done
 
+		#Verification des liens p-XXXX.ksh
+		for i in `find -P $ENV_PATH/shell -name "p-*.ksh" -type f`; do
+			ERRORS=`expr $ERRORS + 1`; FINAL_COMMENT="$FINAL_COMMENT lien symbolique $i mal cree; " ;
+		done
+		
         if [[ $ERRORS -ge $CRITICAL_LIMIT ]]; then
                 FINAL_STATE=$CRITICAL
                 FINAL_COMMENT="CRITICAL : Nombre d'erreur(s) $ERRORS : $FINAL_COMMENT"
