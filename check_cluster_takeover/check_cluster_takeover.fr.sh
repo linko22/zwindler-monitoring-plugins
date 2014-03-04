@@ -71,23 +71,24 @@ LINE_NUMBER=`cat $CLUSTER_MASTER_LOG_PATH | wc -l`
 if [[ ! -f $CLUSTER_MASTER_LOG_PATH ]] || [[ $LINE_NUMBER -eq 0 ]] ; then
         FINAL_COMMENT="WARNING : attention, le fichier $CLUSTER_MASTER_LOG_PATH n'existe pas ou est vide => pas d'info sur le cluster"
         FINAL_STATE=$WARNING
-fi
-#Ici on recuppere supprime tous les doublons dans le fichier
-UNIQUE=`tail -${HISTORY} $CLUSTER_MASTER_LOG_PATH | uniq | wc -l`
-#Le nombre de bascule est egal au resultat precedent - 1
-TAKEOVER=`echo "$UNIQUE - 1" | bc`
-TIMERANGE=`echo "$HISTORY * 5" | bc`
-MESSAGE="$TAKEOVER bascule(s) dans l'intervalle de temps determine ($TIMERANGE minutes)"
-
-if [[ TAKEOVER -ge CRITICAL_LIMIT ]] ; then
-        FINAL_COMMENT="CRITICAL : Attention, $MESSAGE"
-        FINAL_STATE=$CRITICAL
-elif [[ TAKEOVER -ge WARNING_LIMIT ]] ; then
-        FINAL_COMMENT="WARNING : Attention, $MESSAGE"
-        FINAL_STATE=$WARNING
 else
-        FINAL_COMMENT="OK : $MESSAGE"
-        FINAL_STATE=$OK
+        #Ici on recuppere supprime tous les doublons dans le fichier
+        UNIQUE=`tail -${HISTORY} $CLUSTER_MASTER_LOG_PATH | uniq | wc -l`
+        #Le nombre de bascule est egal au resultat precedent - 1
+        TAKEOVER=`echo "$UNIQUE - 1" | bc`
+        TIMERANGE=`echo "$HISTORY * 5" | bc`
+        MESSAGE="$TAKEOVER bascule(s) dans l'intervalle de temps determine ($TIMERANGE minutes)"
+
+        if [[ TAKEOVER -ge CRITICAL_LIMIT ]] ; then
+                FINAL_COMMENT="CRITICAL : Attention, $MESSAGE"
+                FINAL_STATE=$CRITICAL
+        elif [[ TAKEOVER -ge WARNING_LIMIT ]] ; then
+                FINAL_COMMENT="WARNING : Attention, $MESSAGE"
+                FINAL_STATE=$WARNING
+        else
+                FINAL_COMMENT="OK : $MESSAGE"
+                FINAL_STATE=$OK
+        fi
 fi
 
 #Fin du script
