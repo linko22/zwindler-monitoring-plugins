@@ -1,5 +1,5 @@
 #!/bin/bash
-#Squelette de plugin Nagios perso
+#Squelette de plugin Nagios en bash
 ############################################################################
 #This file is a part of zwindler-monitoring-plugins repository
 #Copyright (C) 2013 zwindler
@@ -32,40 +32,44 @@ WARNING_LIMIT=1
 CRITICAL_LIMIT=2
 ENABLE_PERFDATA=0
 
-#Si on a des arguments et qu'on veut les verifier
-if [[ -z $1 ]] ; then
-        #Faire une fonction USAGE
-        echo "Usage : $0 [-v] MY_ARGUMENT WARNING_LIMIT CRITICAL_LIMIT"
-        exit 1
-fi
+#Recuperation des arguments. A modifier en fonction du contexte
+while getopts ":vc:w:" opt; do
+	case $opt in
+		v)
+			echo "Mode 'verbose' active"
+			echo
+			VERBOSE=1
+			;;
+		c)
+			CRITICAL_LIMIT=$OPTARG
+			;;
+		w)
+			WARNING_LIMIT=$OPTARG
+			;;
+		\?)
+			echo "Option invalide: -$OPTARG" >&2
+			;;
+		:)
+			echo "L'option -$OPTARG nécessite un argument." >&2
+			exit 1
+			;;
+	esac
+done
 
-#Recuperation des arguments
-if [[ $1 == "-v" ]]; then
-        echo "Activation du verbose mode"
-        echo
-        VERBOSE=1
-        shift
-fi
-if [[ $# -ge 1 ]]; then
-        MY_ARGUMENT=$1
-        shift
-        #MY_ARGUMENT_2=$1
-        #shift
-else
-        #Faire une fonction USAGE
-        echo "Pas assez d'arguments !"
-        echo "Usage : $0 [-v] MY_ARGUMENT WARNING_LIMIT CRITICAL_LIMIT"
-        exit 1
-fi
-if [[ -n $1 ]] ; then
-        WARNING_LIMIT=$1
-fi
-if [[ -n $2 ]] ; then
-        CRITICAL_LIMIT=$2
-fi
+#Vérification des arguments obligatoires (a modifier en fonction du contexte)
+#if [[ -z $MY_ARGUMENT ]] ; then
+#        #TODO %USAGE
+#        echo "Usage : $0 [-v] -a MY_ARGUMENT -v WARNING_LIMIT -c CRITICAL_LIMIT"
+#        exit 1
+#fi
 
-#Execution du script a proprement parler
-#A remplir en fonction du contexte
+#Execution du script a proprement parler. A remplir en fonction du contexte
+#####Le vrai code du check vient ici
+
+#A la fin, vous devriez 
+#- Affecter le status dans la variable $FINAL_STATE
+#- Affecter le descriptif du check dans la variable $FINAL_COMMENT
+#- Affecter les valeurs numériques dans la variable $FINAL_STATE, pour les données de performance
 
 #Generation des PERFDATA si c'est applicable
 if [[ $ENABLE_PERFDATA -eq 1 ]] ; then
@@ -74,8 +78,8 @@ fi
 
 #Fin du script
 if [[ $VERBOSE -eq 1 ]] ; then
-        echo "Variables :"
-	#Ajouter en fin de ligne les variables a afficher en mode verbose
+echo "Variables :"
+	#Ajouter en fin de ligne "for" les variables a afficher en mode verbose
 	for i in WARNING_LIMIT CRITICAL_LIMIT
 	do
 		echo -n "$i : "
@@ -86,4 +90,3 @@ fi
 
 echo ${FINAL_COMMENT}${PERFDATA}
 exit $FINAL_STATE
-
