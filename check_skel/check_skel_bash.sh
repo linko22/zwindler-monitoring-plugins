@@ -18,50 +18,86 @@
 #along with this program. If not, see {http://www.gnu.org/licenses/}.
 ################################################################################
 #Nagios Constants
-OK=0
-WARNING=1
-CRITICAL=2
-UNKNOWN=3
+STATE_OK=0
+STATE_WARNING=1
+STATE_CRITICAL=2
+STATE_UNKNOWN=3
+SCRIPTPATH=`echo $0 | /bin/sed -e 's,[\\/][^\\/][^\\/]*$,,'`
+if [[ -f ${SCRIPTPATH}/utils.sh ]]; then
+        . ${SCRIPTPATH}/utils.sh # use nagios utils to set real STATE_* return values
+fi
+
+#Useful functions
+printversion(){
+	echo "$0 $VERSION"
+	echo
+}
+
+printusage() {
+	printversion
+	echo "Write additional information for script and usage"
+}
+
+printvariables() {
+	echo "Variables:"
+	#Add all your variables at the en of the "for" line to display them in verbose
+	for i in WARNING_THRESHOLD CRITICAL_THRESHOLD FINAL_STATE FINAL_COMMENT ENABLE_PERFDATA VERSION
+	do
+		echo -n "$i : "
+		eval echo \$${i}
+	done
+	echo
+}
 
 #Set to unknown in case of unplaned exit
-FINAL_STATE=$UNKNOWN
-FINAL_COMMENT="UNKNOWN : Unplaned exit. You should check that everything is alright"
+FINAL_STATE=$STATE_UNKNOWN
+FINAL_COMMENT="UNKNOWN: Unplaned exit. You should check that everything is alright"
 
 #Default values (should be changed according to context)
-WARNING_LIMIT=1
-CRITICAL_LIMIT=2
+WARNING_THRESHOLD=1
+CRITICAL_THRESHOLD=1
 ENABLE_PERFDATA=0
+VERSION="1.0"
 
 #Process arguments. Add proper options and processing
-while getopts ":vc:w:" opt; do
+while getopts ":c:vVw:" opt; do
 	case $opt in
+		c)
+			CRITICAL_THRESHOLD=$OPTARG
+			;;
+		h)
+			printusage
+			exit $STATE_OK
+			;;
 		v)
 			echo "Verbose mode ON"
 			echo
 			VERBOSE=1
 			;;
-		c)
-			CRITICAL_LIMIT=$OPTARG
+		V)
+			printversion
+			exit $STATE_UNKNOWN
 			;;
 		w)
-			WARNING_LIMIT=$OPTARG
+			WARNING_THRESHOLD=$OPTARG
 			;;
 		\?)
-			echo "Invalid option: -$OPTARG" >&2
+			echo "UNKNOWN: Invalid option: -$OPTARG"
+			exit $STATE_UNKNOWN
 			;;
 		:)
-			echo "Option -$OPTARG requires an argument." >&2
-			exit 1
+			echo "UNKNOWN: Option -$OPTARG requires an argument."
+			exit $STATE_UNKNOWN
 			;;
 	esac
 done
 
-#In case some arguments are mandatory (like -a), check for them
-#if [[ -z $MY_ARGUMENT ]] ; then
-#        #TODO %USAGE
-#        echo "Usage : $0 [-v] -a MY_ARGUMENT -v WARNING_LIMIT -c CRITICAL_LIMIT"
-#        exit 1
-#fi
+#Check all the mandatory arguments, adapt to your case
+if [[ -z $CRITICAL_THRESHOLD || -z $WARNING_THRESHOLD ]]; then
+echo "UNKNOWN: No warning or critical threshold given"
+        printusage
+        exit $STATE_UNKNOWN
+fi
 
 #Real check goes here. Write your own code according to context
 #####REAL CHECK GOES HERE
@@ -72,19 +108,12 @@ done
 
 #Perfdata processing, if applicable
 if [[ $ENABLE_PERFDATA -eq 1 ]] ; then
-	PERFDATA=" | $CHECK_VALUE;$WARNING_LIMIT;$CRITICAL_LIMIT;"
+	PERFDATA=" | $CHECK_VALUE;$WARNING_THRESHOLD;$CRITICAL_THRESHOLD;"
 fi
 
 #Script end, display verbose information
 if [[ $VERBOSE -eq 1 ]] ; then
-	echo "Variables :"
-	#Add all your variables at the en of the "for" line to display them 
-	for i in WARNING_LIMIT CRITICAL_LIMIT
-	do
-		echo -n "$i : "
-		eval echo \$${i}
-	done
-	echo
+	printvariables
 fi
 
 echo ${FINAL_COMMENT}${PERFDATA}
