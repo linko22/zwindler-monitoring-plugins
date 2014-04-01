@@ -60,7 +60,7 @@ ENABLE_PERFDATA=0
 VERSION="1.0"
 
 #Process arguments. Add proper options and processing
-while getopts ":c:vVw:" opt; do
+while getopts ":c:hvVw:" opt; do
 	case $opt in
 		c)
 			CRITICAL_THRESHOLD=$OPTARG
