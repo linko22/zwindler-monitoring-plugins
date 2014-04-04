@@ -157,7 +157,7 @@ fi
 
 #Check Weblogic environement file
 if [[ ! -f $WEBLOGIC_HOME/bin/setWLSEnv.sh ]] ; then
-        echo "CRITICAL: No file $WEBLOGIC_HOME/bin/setWLSEnv.sh found. Exiting"
+        echo "CRITICAL: No file $WEBLOGIC_HOME/bin/setWLSEnv.sh found or no rights on path/file. Exiting"
         exit $STATE_CRITICAL
 fi
 
@@ -173,8 +173,8 @@ else
 fi
 
 if [[ $? -ne 0 ]]; then
-        echo "CRITICAL: java weblogic.WLST failed. Use verbose to help debug the error"
-        exit $STATE_CRITICAL
+        echo "UNKNOWN: java weblogic.WLST failed. Use verbose to help debug the error"
+        exit $STATE_UNKNOWN
 fi
 COUNT=`echo $CHECK_VALUE | awk -F "=" '{print $2}'`
 
