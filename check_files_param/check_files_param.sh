@@ -180,14 +180,14 @@ FIND_COMMAND="$FIND_COMMAND | wc -l"
 CHECK_VALUE=$(eval $FIND_COMMAND)
 
 if [[ $CHECK_VALUE -ge $CRITICAL_THRESHOLD ]]; then
-        FINAL_COMMENT="CRITICAL: $CHECK_VALUE found matching critiria"
+        FINAL_COMMENT="CRITICAL: $CHECK_VALUE found matching criteria in $PATH_TO_CHECK"
         FINAL_STATE=$STATE_CRITICAL
 else
         if [[ $CHECK_VALUE -ge $WARNING_THRESHOLD ]]; then
-                FINAL_COMMENT="WARNING: $CHECK_VALUE found matching critiria"
+                FINAL_COMMENT="WARNING: $CHECK_VALUE found matching criteria in $PATH_TO_CHECK"
                 FINAL_STATE=$STATE_WARNING
         else
-                FINAL_COMMENT="OK: $CHECK_VALUE found matching critiria"
+                FINAL_COMMENT="OK: $CHECK_VALUE found matching criteria in $PATH_TO_CHECK"
                 FINAL_STATE=$STATE_OK
         fi
 fi
@@ -196,7 +196,7 @@ fi
 
 #Perfdata processing, if applicable
 if [[ $ENABLE_PERFDATA -eq 1 ]] ; then
-        PERFDATA=" | $CHECK_VALUE;$WARNING_THRESHOLD;$CRITICAL_THRESHOLD;"
+        PERFDATA=" | nbFiles=$CHECK_VALUE;$WARNING_THRESHOLD;$CRITICAL_THRESHOLD;"
 fi
 
 #Script end, display verbose information
