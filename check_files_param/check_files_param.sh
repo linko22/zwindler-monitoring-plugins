@@ -52,6 +52,8 @@ printusage() {
         echo "e - (pattern) exclude from the result the files whose name matches the pattern"
         echo "h - displays help"
         echo "i - (pattern) only take into account files whose name matches the pattern"
+        echo "m - (minutes, [+|-]number) only take into account files more than/less than/exactly (use 
+'+' or '-' or nothnig) than X minutes old. Ex: '-m +30' for file older than 30 minutes"
         echo "p - (path, mandatory) directory or file to check"
         echo "v - verbose mode"
         echo "V - displays version"
@@ -100,7 +102,7 @@ while getopts ":c:d:e:hi:m:p:vVw:" opt; do
                 INCLUDE_PATTERN=$OPTARG
                 ;;
         m)
-                OLDER_THAN_MINUTES=$OPTARG
+                AGE_MINUTES=$OPTARG
                 ;;
         p)
                 PATH_TO_CHECK=$OPTARG
@@ -149,9 +151,9 @@ fi
 #Building command according to given arguments
 FIND_COMMAND="$FIND_COMMAND '$PATH_TO_CHECK'"
 
-#Adding "older than" criteria
-if [[ -n $OLDER_THAN_MINUTES ]]; then
-        FIND_COMMAND="$FIND_COMMAND -mmin +$OLDER_THAN_MINUTES"
+#Adding mmin (age) criteria
+if [[ -n $AGE_MINUTES ]]; then
+        FIND_COMMAND="$FIND_COMMAND -mmin $AGE_MINUTES"
 fi
 
 #Include pattern if any
