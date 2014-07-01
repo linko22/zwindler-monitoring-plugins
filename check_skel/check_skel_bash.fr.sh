@@ -22,37 +22,73 @@ OK=0
 WARNING=1
 CRITICAL=2
 UNKNOWN=3
+SCRIPTPATH=`echo $0 | /bin/sed -e 's,[\\/][^\\/][^\\/]*$,,'`
+if [[ -f ${SCRIPTPATH}/utils.sh ]]; then
+        . ${SCRIPTPATH}/utils.sh # use nagios utils to set real STATE_* return values
+fi
+
+#Useful functions
+printversion(){
+	echo "$0 $VERSION"
+	echo
+}
+
+printusage() {
+	printversion
+	echo "A ecrire : ajouter des informations sur le scripts et les arguments a fournir"
+}
+
+printvariables() {
+	echo "Variables:"
+	#Ajouter toutes les variables utilisees dans le script a la suite de la ligne "for"
+	for i in WARNING_THRESHOLD CRITICAL_THRESHOLD FINAL_STATE FINAL_COMMENT ENABLE_PERFDATA VERSION
+	do
+		echo -n "$i : "
+		eval echo \$${i}
+	done
+	echo
+}
 
 #En cas de sortie non prevue du script
 FINAL_STATE=$UNKNOWN
 FINAL_COMMENT="UNKNOWN : Une erreur dans le script ou un echec de la commande empeche la verification, merci de verifier que tout fonctionne bien comme il le devrait"
 
-#Valeur par defaut de variable (a modifier en fonction du contexte)
-WARNING_LIMIT=1
-CRITICAL_LIMIT=2
+#Valeurs par defaut de variable (a modifier en fonction du contexte)
+WARNING_THRESHOLD=1
+CRITICAL_THRESHOLD=1
 ENABLE_PERFDATA=0
+VERSION="1.0"
 
 #Recuperation des arguments. A modifier en fonction du contexte
-while getopts ":vc:w:" opt; do
+while getopts ":c:hvVw:" opt; do
 	case $opt in
-		v)
-			echo "Mode 'verbose' active"
-			echo
-			VERBOSE=1
-			;;
-		c)
-			CRITICAL_LIMIT=$OPTARG
-			;;
-		w)
-			WARNING_LIMIT=$OPTARG
-			;;
-		\?)
-			echo "Option invalide: -$OPTARG" >&2
-			;;
-		:)
-			echo "L'option -$OPTARG nécessite un argument." >&2
-			exit 1
-			;;
+	c)
+		CRITICAL_THRESHOLD=$OPTARG
+		;;
+	h)
+		printusage
+		exit $STATE_OK
+		;;
+	v)
+		echo "Mode 'verbose' active"
+		echo
+		VERBOSE=1
+		;;
+	V)
+		printversion
+		exit $STATE_UNKNOWN
+		;;
+	w)
+		WARNING_THRESHOLD=$OPTARG
+		;;
+	\?)
+		echo "Option invalide: -$OPTARG" >&2
+		exit $STATE_UNKNOWN
+		;;
+	:)
+		echo "L'option -$OPTARG nécessite un argument." >&2
+		exit 1
+		;;
 	esac
 done
 
@@ -73,19 +109,12 @@ done
 
 #Generation des PERFDATA si c'est applicable
 if [[ $ENABLE_PERFDATA -eq 1 ]] ; then
-	PERFDATA=" | $CHECK_VALUE;$WARNING_LIMIT;$CRITICAL_LIMIT;"
+	PERFDATA=" | $CHECK_VALUE;$WARNING_THRESHOLD;$CRITICAL_THRESHOLD;"
 fi
 
 #Fin du script
 if [[ $VERBOSE -eq 1 ]] ; then
-echo "Variables :"
-	#Ajouter en fin de ligne "for" les variables a afficher en mode verbose
-	for i in WARNING_LIMIT CRITICAL_LIMIT
-	do
-		echo -n "$i : "
-		eval echo \$${i}
-	done
-	echo
+	printvariables
 fi
 
 echo ${FINAL_COMMENT}${PERFDATA}
