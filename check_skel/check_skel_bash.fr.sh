@@ -56,10 +56,10 @@ while getopts ":vc:w:" opt; do
 	esac
 done
 
-#Vérification des arguments obligatoires (a modifier en fonction du contexte)
+#Verification des arguments obligatoires (a modifier en fonction du contexte)
 #if [[ -z $MY_ARGUMENT ]] ; then
 #        #TODO %USAGE
-#        echo "Usage : $0 [-v] -a MY_ARGUMENT -v WARNING_LIMIT -c CRITICAL_LIMIT"
+#        echo "Usage : $0 [-v] -a MY_ARGUMENT -w WARNING_LIMIT -c CRITICAL_LIMIT"
 #        exit 1
 #fi
 
