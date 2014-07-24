@@ -42,7 +42,7 @@ process_data(@collected_data);
 
 #The process should have ended at "print_nagios_output". This is wrong
 print "UNKNOWN: There is a problem with the plugin. Exiting.\n";
-exit $ERRORS{"UNKNOW"};
+exit $ERRORS{"UNKNOWN"};
 
 ### Subroutines ################################################################
 
