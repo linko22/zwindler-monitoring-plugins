@@ -48,14 +48,14 @@ printusage() {
         echo "'$0 -h' displays version"
         echo
         echo "c - (positive number, default = 1) critical threshold for files"
-        echo "d - (days , [+|-]number) only take into account files more than/less than/exactly (use
-'+' or '-' or nothing) X days old. Ex: '-d +3' for file older than 3 days"
+        echo "d - (days , [+|-|_]number) only take into account files more than/less than/exactly (use
+'+' or '-'/'_' or nothing) X days old. Ex: '-d _3' for file with age less than 3 days with NRPE"
         echo "D - (positive number, default = 1) depth of find"
         echo "e - (pattern) exclude from the result the files whose name matches the pattern"
         echo "h - displays help"
         echo "i - (pattern) only take into account files whose name matches the pattern"
-        echo "m - (minutes, [+|-]number) only take into account files more than/less than/exactly (use 
-'+' or '-' or nothing) X minutes old. Ex: '-m +30' for file older than 30 minutes"
+        echo "m - (minutes, [+|-|_]number) only take into account files more than/less than/exactly (use
+'+' or '-'/'_' or nothing) X minutes old. Ex: '-m +30' for file older than 30 minutes"
         echo "p - (path, mandatory) directory or file to check"
         echo "v - verbose mode"
         echo "V - displays version"
@@ -156,10 +156,12 @@ fi
 #Building command according to given arguments
 FIND_COMMAND="$FIND_COMMAND '$PATH_TO_CHECK'"
 
-#Adding age criteria (mtime OR mmin)
+#Adding age criteria (mtime OR mmin). "_" are used to escape "-" for NRPE
 if [[ -n $AGE_MINUTES ]]; then
+        AGE_MINUTES=`echo $AGE_MINUTES | tr "_" "-"`
         FIND_COMMAND="$FIND_COMMAND -mmin $AGE_MINUTES"
 elif [[ -n $AGE_DAYS ]]; then
+        AGE_DAYS=`echo $AGE_DAYS | tr "_" "-"`
         FIND_COMMAND="$FIND_COMMAND -mtime $AGE_DAYS"
 fi
 
