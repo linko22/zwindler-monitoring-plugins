@@ -48,12 +48,14 @@ printusage() {
         echo "'$0 -h' displays version"
         echo
         echo "c - (positive number, default = 1) critical threshold for files"
-        echo "d - (positive number, default = 1) depth of find"
+        echo "d - (days , [+|-]number) only take into account files more than/less than/exactly (use
+'+' or '-' or nothing) X days old. Ex: '-d +3' for file older than 3 days"
+        echo "D - (positive number, default = 1) depth of find"
         echo "e - (pattern) exclude from the result the files whose name matches the pattern"
         echo "h - displays help"
         echo "i - (pattern) only take into account files whose name matches the pattern"
         echo "m - (minutes, [+|-]number) only take into account files more than/less than/exactly (use 
-'+' or '-' or nothnig) than X minutes old. Ex: '-m +30' for file older than 30 minutes"
+'+' or '-' or nothing) X minutes old. Ex: '-m +30' for file older than 30 minutes"
         echo "p - (path, mandatory) directory or file to check"
         echo "v - verbose mode"
         echo "V - displays version"
@@ -63,7 +65,7 @@ printusage() {
 printvariables() {
         echo "Variables:"
         #Add all your variables at the en of the "for" line to display them in verbose
-        for i in WARNING_THRESHOLD CRITICAL_THRESHOLD FINAL_STATE FINAL_COMMENT ENABLE_PERFDATA VERSION PATH_TO_CHECK EXCLUDE_PATTERN INCLUDE_PATTERN FIND_COMMAND OLDER_THAN_MINUTES MAXDEPTH
+        for i in WARNING_THRESHOLD CRITICAL_THRESHOLD FINAL_STATE FINAL_COMMENT ENABLE_PERFDATA VERSION PATH_TO_CHECK EXCLUDE_PATTERN INCLUDE_PATTERN FIND_COMMAND AGE_DAYS AGE_MINUTES MAXDEPTH
         do
                 echo -n "$i : "
                 eval echo \$${i}
@@ -79,16 +81,19 @@ FINAL_COMMENT="UNKNOWN: Unplaned exit. You should check that everything is alrig
 WARNING_THRESHOLD=1
 CRITICAL_THRESHOLD=1
 ENABLE_PERFDATA=1
-VERSION="1.0"
+VERSION="1.1"
 MAXDEPTH=1
 
 #Process arguments. Add proper options and processing
-while getopts ":c:d:e:hi:m:p:vVw:" opt; do
+while getopts ":c:d:D:e:hi:m:p:vVw:" opt; do
         case $opt in
         c)
                 CRITICAL_THRESHOLD=$OPTARG
                 ;;
         d)
+                AGE_DAYS=$OPTARG
+                ;;
+        D)
                 MAXDEPTH=$OPTARG
                 ;;
         e)
@@ -151,9 +156,11 @@ fi
 #Building command according to given arguments
 FIND_COMMAND="$FIND_COMMAND '$PATH_TO_CHECK'"
 
-#Adding mmin (age) criteria
+#Adding age criteria (mtime OR mmin)
 if [[ -n $AGE_MINUTES ]]; then
         FIND_COMMAND="$FIND_COMMAND -mmin $AGE_MINUTES"
+elif [[ -n $AGE_DAYS ]]; then
+        FIND_COMMAND="$FIND_COMMAND -mtime $AGE_DAYS"
 fi
 
 #Include pattern if any
