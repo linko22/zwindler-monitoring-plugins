@@ -128,9 +128,9 @@ def main():
 
         #Lier des status DP a un status Nagios, plus ou moins stricte en fonction de la presence ou non du mode --strict
         if strict_mode:
-                job_status_list={'Completed': 0, 'Completed/Errors': 1, 'Completed/Failure': 2, 'Failed': 2, 'Aborted': 2, 'InProgress': 3, 'Queuing': 3, 'InProgress/Error': 3}
+                job_status_list={'Completed': 0, 'Completed/Errors': 1, 'Completed/Failure': 2, 'Failed': 2, 'Aborted': 2, 'InProgress': 3, 'InProgress/Failu': 3, 'Queuing': 3, 'InProgress/Error': 3}
         else:
-                job_status_list={'Completed': 0, 'Completed/Errors': 0, 'Completed/Failure': 1, 'Failed': 2, 'Aborted': 2, 'InProgress': 3, 'Queuing': 3, 'InProgress/Error': 3}
+                job_status_list={'Completed': 0, 'Completed/Errors': 0, 'Completed/Failure': 1, 'Failed': 2, 'Aborted': 2, 'InProgress': 3, 'InProgress/Failu': 3, 'Queuing': 3, 'InProgress/Error': 3}
 
         #Initialisation des variables
         local_path="/tmp/"
@@ -139,7 +139,7 @@ def main():
         file_output=[]
 
         #Generation des commandes et des fichiers
-        filename="check_dp_spec.py."+datalist+".output"
+        filename="check_dp_spec.py."+datalist.replace(" ", "")+".output"
         report_command='/opt/omni/bin/omnidb -session'+last+' -datalist "'+datalist+'" &> '+local_path+filename+' 2> '+local_path+filename+'err'
 
         #Avant de lancer la commande, on attend de maniere aleatoire pour reduire les connexions concurrentes multiples
