@@ -16,13 +16,13 @@
 #You should have received a copy of the GNU General Public License
 #along with this program. If not, see {http://www.gnu.org/licenses/}.
 ################################################################################
-#Nagios Constants
 #This plugin is an alternative to standard check_http, which doesn't handles
 #well the combination of 302/follow and blocked URL on proxy server. Timeout
 #doesn't occur, making it difficult to validate that the URL is indeed blocked
 #by the proxy server
 #Best used with cntlm and hashed password with "cntlm -H -c /etc/cntlm.conf"
 ################################################################################
+#Nagios Constants
 OK=0
 WARNING=1
 CRITICAL=2
