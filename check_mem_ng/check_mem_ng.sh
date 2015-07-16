@@ -21,6 +21,8 @@
 #I did a code cleanup and added a check of "free" version, because since
 #procps-ng 3.3.0 (RHEL 7+) check_mem.sh doesn't work anymore (buff/cache column)
 ################################################################################
+# 1.1 - Added -l flag and LEGACY_PERFATA var to put legacy perfdata mode
+################################################################################
 #Nagios Constants
 STATE_OK=0
 STATE_WARNING=1
@@ -40,11 +42,12 @@ printversion(){
 printusage() {
         printversion
         echo "Usage:"
-        echo "  check_mem_ng.sh [-w <warnlevel>] [-c <critlevel>] [-v]"
+        echo "  check_mem_ng.sh [-w <warnlevel>] [-c <critlevel>] [-v] [-l]"
         echo "    checks local host available memory"
         echo "    warnlevel and critlevel is percentage value without %"
         echo "    defaults being respectively 80 et 90"
         echo "    add -v for verbose (debuging purpose)"
+        echo "    add -l for legacy perfdata mode (or change LEGACY_PERFDATA variable in script)"
         echo "  check_mem_ng.sh -V"
         echo "    prints version"
         echo "  check_mem_ng.sh -h"
@@ -55,7 +58,7 @@ printusage() {
 printvariables() {
         echo "Variables:"
         #Add all your variables at the en of the "for" line to display them in verbose
-        for i in WARNING_THRESHOLD CRITICAL_THRESHOLD FINAL_STATE FINAL_COMMENT ENABLE_PERFDATA VERSION
+        for i in WARNING_THRESHOLD CRITICAL_THRESHOLD FINAL_STATE FINAL_COMMENT LEGACY_PERFDATA FREE_OUTPUT TOTAL_MEM FREE_MEM BUFFCACHE_MEM BUFF_MEM CACHE_MEM USED_MEM TOTAL_MEM_MB USED_MEM_MB WARNING_THRESHOLD_B CRITICAL_THRESHOLD_B USED_MEM_PRC ENABLE_PERFDATA VERSION
         do
                 echo -n "$i : "
                 eval echo \$${i}
@@ -71,10 +74,16 @@ FINAL_COMMENT="UNKNOWN: Unplaned exit. You should check that everything is alrig
 WARNING_THRESHOLD=80
 CRITICAL_THRESHOLD=90
 ENABLE_PERFDATA=1
-VERSION="1.0"
+VERSION="1.1"
+VERBOSE=0
+
+#####FORCE LEGACY MODE#####
+#put 1 to force legacy perfdata mode without using "-l" flag (no configuration change in nrpe.cfg)
+LEGACY_PERFDATA=0
+#####FORCE LEGACY MODE#####
 
 #Process arguments
-while getopts ":c:hvVw:" opt; do
+while getopts ":c:hlvVw:" opt; do
         case $opt in
                 c)
                         CRITICAL_THRESHOLD=$OPTARG
@@ -82,6 +91,9 @@ while getopts ":c:hvVw:" opt; do
                 h)
                         printusage
                         exit $STATE_OK
+                        ;;
+                l)
+                        LEGACY_PERFDATA=1
                         ;;
                 v)
                         echo "Verbose mode ON"
@@ -113,6 +125,12 @@ FREE_MEM=`echo $FREE_OUTPUT |awk '{print $4}'`
 if [ `free -V | grep procps-ng | wc -l` -eq 1  ]; then
         #procps-ng, free will display buff/cache as one column
         BUFFCACHE_MEM=`echo $FREE_OUTPUT |awk '{print $6}'`
+        if [ $LEGACY_PERFDATA -eq 1 ] ; then
+                #Get BUFFER and CACHE separatly for legacy output
+                FREE_OUTPUT2=`free -b | grep Mem:`
+                BUFF_MEM=`echo $FREE_OUTPUT2 |awk '{print $6}'`
+                CACHE_MEM=`echo $FREE_OUTPUT2 |awk '{print $7}'`
+        fi
 else
         #procps, free will display buff/cache as two separate columns
         BUFF_MEM=`echo $FREE_OUTPUT |awk '{print $6}'`
@@ -145,8 +163,13 @@ else
 fi
 
 #Perfdata processing
-if [[ $ENABLE_PERFDATA -eq 1 ]] ; then
-        PERFDATA=" | Memory_Used=$USED_MEM;$WARNING_THRESHOLD_B;$CRITICAL_THRESHOLD_B;0;$TOTAL_MEM"
+if [ $ENABLE_PERFDATA -eq 1 ] ; then
+        #Added check_mem.sh legacy perfdata mode, to ease migration
+        if [ $LEGACY_PERFDATA -eq 1 ] ; then
+                PERFDATA=" | TOTAL=$TOTAL_MEM;;;; USED=$USED_MEM;;;; CACHE=$CACHE_MEM;;;; BUFFER=$BUFF_MEM;;;;"
+        else
+                PERFDATA=" | Memory_Used=$USED_MEM;$WARNING_THRESHOLD_B;$CRITICAL_THRESHOLD_B;0;$TOTAL_MEM"
+        fi
 fi
 
 #Script end, display verbose information
