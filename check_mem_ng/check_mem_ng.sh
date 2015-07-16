@@ -40,11 +40,17 @@ printversion(){
 printusage() {
         printversion
         echo "Usage:"
-        echo "check_mem_ng.sh -w <warnlevel> -c <critlevel>"
-        echo ""
-        echo "warnlevel and critlevel is percentage value without %"
-        echo "defaults being respectively 80 et 90"
+        echo "  check_mem_ng.sh [-w <warnlevel>] [-c <critlevel>] [-v]"
+        echo "    checks local host available memory"
+        echo "    warnlevel and critlevel is percentage value without %"
+        echo "    defaults being respectively 80 et 90"
+        echo "    add -v for verbose (debuging purpose)"
+        echo "  check_mem_ng.sh -V"
+        echo "    prints version"
+        echo "  check_mem_ng.sh -h"
+        echo "    prints help (this message)"
 }
+
 
 printvariables() {
         echo "Variables:"
@@ -67,7 +73,7 @@ CRITICAL_THRESHOLD=90
 ENABLE_PERFDATA=1
 VERSION="1.0"
 
-#Process arguments. Add proper options and processing
+#Process arguments
 while getopts ":c:hvVw:" opt; do
         case $opt in
                 c)
