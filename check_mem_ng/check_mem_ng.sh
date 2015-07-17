@@ -168,7 +168,7 @@ if [ $ENABLE_PERFDATA -eq 1 ] ; then
         if [ $LEGACY_PERFDATA -eq 1 ] ; then
                 PERFDATA=" | TOTAL=$TOTAL_MEM;;;; USED=$USED_MEM;;;; CACHE=$CACHE_MEM;;;; BUFFER=$BUFF_MEM;;;;"
         else
-                PERFDATA=" | Memory_Used=$USED_MEM;$WARNING_THRESHOLD_B;$CRITICAL_THRESHOLD_B;0;$TOTAL_MEM"
+                PERFDATA=" | Memory_Used=${USED_MEM}B;$WARNING_THRESHOLD_B;$CRITICAL_THRESHOLD_B;0;$TOTAL_MEM;"
         fi
 fi
 
